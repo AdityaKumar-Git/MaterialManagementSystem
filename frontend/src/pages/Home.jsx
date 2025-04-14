@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import ProductCard from "../components/ProductCard";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+    const navigate = useNavigate();
     
     return (
         <div className="min-h-screen bg-gray-100">
@@ -19,33 +22,27 @@ const Home = () => {
             <section className="container mx-auto px-6 py-12">
                 <h2 className="text-3xl font-semibold text-center mb-8">Featured Materials</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Sample Product Cards */}
-                    <div className="bg-white shadow-md rounded-lg p-4">
-                        <img src="https://placehold.co/300x200" alt="Material" className="w-full h-48 object-cover rounded-md" />
-                        <h3 className="text-xl font-semibold mt-4">Steel Rods</h3>
-                        <p className="text-gray-600">High-quality steel rods for construction.</p>
-                        <Link to="/products/1" className="mt-3 inline-block text-blue-600 font-semibold hover:underline">
-                            View Details
-                        </Link>
-                    </div>
-
-                    <div className="bg-white shadow-md rounded-lg p-4">
-                        <img src="https://placehold.co/300x200" alt="Material" className="w-full h-48 object-cover rounded-md" />
-                        <h3 className="text-xl font-semibold mt-4">Cement Bags</h3>
-                        <p className="text-gray-600">Premium cement for strong foundations.</p>
-                        <Link to="/products/2" className="mt-3 inline-block text-blue-600 font-semibold hover:underline">
-                            View Details
-                        </Link>
-                    </div>
-
-                    <div className="bg-white shadow-md rounded-lg p-4">
-                        <img src="https://placehold.co/300x200" alt="Material" className="w-full h-48 object-cover rounded-md" />
-                        <h3 className="text-xl font-semibold mt-4">Electrical Wires</h3>
-                        <p className="text-gray-600">Durable and safe electrical wiring solutions.</p>
-                        <Link to="/products/3" className="mt-3 inline-block text-blue-600 font-semibold hover:underline">
-                            View Details
-                        </Link>
-                    </div>
+                    <ProductCard 
+                        name="Transformers"
+                        price={150000}
+                        stock={5}
+                        description="High-performance step-down transformers suitable for industrial use."
+                        image="https://placehold.co/300x200"
+                    />
+                    <ProductCard 
+                        name="Switches"
+                        price={1500}
+                        stock={30}
+                        description="Durable electrical switches with safety lock mechanism."
+                        image="https://placehold.co/300x200"
+                    />
+                    <ProductCard 
+                        name="Insulators"
+                        price={700}
+                        stock={100}
+                        description="Ceramic insulators for high-voltage transmission lines."
+                        image="https://placehold.co/300x200"
+                    />
                 </div>
             </section>
         </div>

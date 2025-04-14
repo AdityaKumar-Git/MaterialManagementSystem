@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../store/authSlice";
+import { login } from "../store/adminSlice.js";
 import { useDispatch } from "react-redux";
 import axios from "../axios.js";
 
@@ -14,7 +14,7 @@ const isValidPhoneNumber = (phoneNumber) => {
     return phoneNumberRegex.test(phoneNumber);
 };
 
-const Login = () => {
+const AdminLogin = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -56,7 +56,7 @@ const Login = () => {
             else{
                 // console.log("Correct Pass:", formData);
                 
-                const response = await axios.post("users/login", formData)
+                const response = await axios.post("admins/login", formData)
                 .catch(error => {
                     console.log("Axios caught error:", error);
                     // throw error; // Re-throw the error so it reaches catch block
@@ -67,12 +67,12 @@ const Login = () => {
                 if (response?.data?.success) {
                     dispatch(
                       login({
-                        user: response.data.user,
+                        admin: response.data.admin,
                         accessToken: response.data.token,
                       })
                     );
                     console.log(response?.data?.message);
-                    navigate('/');
+                    navigate('/adminHome');
                 }
                 else{
                     console.log("Failed to Login:", response.data);
@@ -86,7 +86,7 @@ const Login = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-96 text-center">
-                <h2 className="text-2xl font-bold text-blue-600 mb-4"> User Sign In</h2>
+                <h2 className="text-2xl font-bold text-blue-600 mb-4"><p className=" text-red-600 inline">Admin </p>Sign In</h2>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <input 
                         type="text" 
@@ -116,14 +116,11 @@ const Login = () => {
                     </button>
                 </form>
                 <p className="text-gray-600 mt-4">
-                    Don't have an account? <Link to="/signup" className="text-blue-600 hover:underline">Sign Up</Link>
-                </p>
-                <p className="text-gray-600 mt-4">
-                    Login as Admin? <Link to="/adminLogin" className="text-blue-600 hover:underline">Click Here</Link>
+                    Login as User? <Link to="/login" className="text-blue-600 hover:underline">Click Here</Link>
                 </p>
             </div>
         </div>
     );
 };
 
-export default Login;
+export default AdminLogin;

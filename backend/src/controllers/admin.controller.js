@@ -2,23 +2,22 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-import { User } from "../models/user.model.js";
+import { Admin } from "../models/admin.model.js";
 
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-
-const generateAccessAndRefreshTokens = async(userId) => {
+const generateAccessAndRefreshTokens = async(adminId) => {
     try{
-        const user = await User.findById(userId);
-        if(!user) {
-            throw new ApiError('User not found while generating tokens', 404);
+        const admin = await Admin.findById(adminId);
+        if(!admin) {
+            throw new ApiError('Admin not found while generating tokens', 404);
         }
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateRefreshToken()
+        const accessToken = admin.generateAccessToken()
+        const refreshToken = admin.generateRefreshToken()
         
-        user.refreshToken = refreshToken
-        await user.save({validateBeforeSave : false})
+        admin.refreshToken = refreshToken
+        await admin.save({validateBeforeSave : false})
 
         return {accessToken, refreshToken}
     }
@@ -27,52 +26,49 @@ const generateAccessAndRefreshTokens = async(userId) => {
     }
 }
 
-const registerUser = asyncHandler(async (req, res) => {
-    const {name, email, password, phoneNumber} = req.body
-    console.log("email: ", email);
+// const registerAdmin = asyncHandler(async (req, res) => {
+//     const {name, email, password, phoneNumber} = req.body
+//     console.log("email: ", email);
 
-    if([name, email, password, phoneNumber].some(
-        (field) => field?.trim() === "" )
-    ){
-        throw new ApiError(400, "All fields are required");
-    }
+//     if([name, email, password, phoneNumber].some(
+//         (field) => field?.trim() === "" )
+//     ){
+//         throw new ApiError(400, "All fields are required");
+//     }
 
-    // console.log(User.findOne({email}))
+//     let existedUser = await Admin.findOne({email})
 
-    let existedUser = await User.findOne({email})
+//     if (existedUser) {
+//         throw new ApiError(409, "Admin with E-mail already exists");
+//     }
+    
+//     existedUser = await Admin.findOne({phoneNumber})
 
-    if (existedUser) {
-        throw new ApiError(409, "User with E-mail already exists");
-    }
+//     if (existedUser) {
+//         throw new ApiError(409, "Admin with E-mail already exists");
+//     }
 
-    existedUser = await User.findOne({phoneNumber})
+//     const admin = await Admin.create({
+//         name, 
+//         email, 
+//         password,
+//         phoneNumber
+//     })
 
-    if (existedUser) {
-        throw new ApiError(409, "User with E-mail already exists");
-    }
+//     const createdAdmin = await Admin.findById(admin._id).select(
+//         "-password -refreshToken"
+//     )
 
-    const user = await User.create({
-        name, 
-        email, 
-        password,
-        phoneNumber
-    })
+//     if (!createdAdmin){
+//         throw new ApiError(404, "Something went wrong while registering the Admin.");
+//     }
 
-    const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    )
+//     return res.status(201).json(
+//         new ApiResponse(200, createdUser, "Admin Registered Successfully")
+//     )
+// }) 
 
-    if (!createdUser){
-        throw new ApiError(404, "Something went wrong while registering the user.");
-    }
-
-    return res.status(201).json(
-        new ApiResponse(200, createdUser, "User Registered Successfully")
-    )
-
-}) 
-
-const loginUser = asyncHandler(async (req, res) => {
+const loginAdmin = asyncHandler(async (req, res) => {
     const { email, password, phoneNumber  } = req.body;
 
     if(!email && !phoneNumber){
@@ -85,22 +81,22 @@ const loginUser = asyncHandler(async (req, res) => {
 
     console.log(email || phoneNumber);
 
-    let user = await User.findOne({email: email.toLowerCase()})
-    if(!user){
-        user = await User.findOne({phoneNumber: phoneNumber.trim()})
+    let admin = await Admin.findOne({email: email.toLowerCase()})
+    if(!admin){
+        admin = await Admin.findOne({phoneNumber: phoneNumber.trim()})
     }
 
-    if(!user){
-        throw new ApiError(404, "User not found");
+    if(!admin){
+        throw new ApiError(404, "Admin not found");
     }
 
-    const isPasswordValid = await user.isPasswordCorrect(password)
+    const isPasswordValid = await admin.isPasswordCorrect(password)
     
     if(!isPasswordValid){
         throw new ApiError(401, "Invalid Password");
     }
 
-    const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id);
+    const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(admin._id);
     
     if(!accessToken){
         throw new ApiError(500, "Failed to generate access token");
@@ -109,7 +105,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to generate refresh token");
     }
 
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+    const loggedInAdmin = await Admin.findById(admin._id).select("-password -refreshToken")
 
     const options = {
         // expires: new Date(Date.now() + 30 * 24 * 60 * 60
@@ -125,16 +121,16 @@ const loginUser = asyncHandler(async (req, res) => {
         new ApiResponse(
             200,
             {
-                user: loggedInUser, accessToken, refreshToken
+                admin: loggedInAdmin, accessToken, refreshToken
             },
-            "User logged in successfully",
+            "Admin logged in successfully",
         )
     )
 })
 
-// const logoutUser = asyncHandler(async (req, res) => {
-//     await User.findByIdAndUpdate(
-//         req.user._id,
+// const logoutAdmin = asyncHandler(async (req, res) => {
+//     await Admin.findByIdAndUpdate(
+//         req.admin._id,
 //         {
 //             $unset: {
 //                 refreshToken: 1   
@@ -154,7 +150,7 @@ const loginUser = asyncHandler(async (req, res) => {
 //     .status(200)
 //     .clearCookie("accessToken", options)
 //     .clearCookie("refreshToken", options)
-//     .json(new ApiResponse(200, {}, "User logged out successfully"))
+//     .json(new ApiResponse(200, {}, "Admin logged out successfully"))
 // })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
@@ -170,13 +166,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             process.env.REFRESH_TOKEN_SECRET
         )
     
-        const user = await User.findById(decodedToken?._id)
+        const admin = await Admin.findById(decodedToken?._id)
     
-        if(!user){
-            throw new ApiError('User not found while refreshing token', 404);
+        if(!admin){
+            throw new ApiError('Admin not found while refreshing token', 404);
         }
         
-        if(incomingRefreshToken !== user?.refreshToken) {
+        if(incomingRefreshToken !== admin?.refreshToken) {
             throw new ApiError('Refresh token is expired', 401);
         }
     
@@ -185,7 +181,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             secure: true
         }
     
-        const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
+        const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(admin._id)
     
         return res
         .status(200)
@@ -207,8 +203,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 export {
-    registerUser,
-    loginUser,
+    // registerAdmin,
+    loginAdmin,
     // logoutUser,
     refreshAccessToken
 } 

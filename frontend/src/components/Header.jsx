@@ -5,12 +5,15 @@ import axios from "../axios.js";
 
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, selectUserAuth, selectUser } from '../store/authSlice.js';
+import { selectAdminAuth, selectAdmin, logout as adminlogout } from "../store/adminSlice.js";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
     const [isOpen, setIsOpen] = useState(false);
     const userAuth = useSelector(selectUserAuth);
+    const adminAuth = useSelector(selectAdminAuth);
     const user = useSelector(selectUser);
+    const admin = useSelector(selectAdmin);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -23,16 +26,16 @@ const Header = () => {
                 </Link>
                 
                 <nav className="hidden md:flex gap-6">
-                    <Link to="/" className="text-gray-700 hover:text-blue-600">
+                    <Link to={`${adminAuth? "adminHome" : "/"}`} className="text-gray-700 hover:text-blue-600">
                         Home
                     </Link>
-                    <Link to="/products" className="text-gray-700 hover:text-blue-600">
+                    <Link to="/products" className={`text-gray-700 hover:text-blue-600`}>
                         Products
                     </Link>
                     {/* <Link to="/about" className="text-gray-700 hover:text-blue-600">
                         About
                     </Link> */}
-                    <Link to="/contact" className="text-gray-700 hover:text-blue-600">
+                    <Link to="/contact" className={`text-gray-700 hover:text-blue-600 ${adminAuth ? "hidden" : ""}`}>
                         Contact
                     </Link>
                 </nav>
@@ -42,16 +45,17 @@ const Header = () => {
                     {/* <Link to="/profile" className="text-gray-700 hover:text-blue-600">
                         Profile
                     </Link> */}
-                    <Link to="/login" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${userAuth ? "hidden" : ""}`}>
+                    <Link to="/login" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${userAuth || adminAuth ? "hidden" : ""}`}>
                         Login
                     </Link>
-                    <Link to="/signup" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${userAuth ? "hidden" : ""}`}>
+                    {/* <Link to="/signup" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${userAuth ? "hidden" : ""}`}>
                         Signup
-                    </Link>
-                    <div className={`px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-center ${userAuth ? "" : "hidden"}`} 
+                    </Link> */}
+                    <div className={`px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-center ${userAuth || adminAuth ? "" : "hidden"}`} 
                         onClick={async () => {
                             setIsOpen(false); 
-                            dispatch(logout());
+                            if(userAuth) dispatch(logout());
+                            if(adminAuth) dispatch(adminlogout());
                             navigate("/")
                         }}>
                             Signout
@@ -74,22 +78,23 @@ const Header = () => {
                         <Link to="/products" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
                             Products
                         </Link>
-                        <Link to="/about" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
+                        <Link to="/about" className={`text-gray-700 hover:text-blue-600 ${adminAuth ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
                             About
                         </Link>
-                        <Link to="/contact" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
+                        <Link to="/contact" className={`text-gray-700 hover:text-blue-600 ${adminAuth ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
                             Contact
                         </Link>
-                        <Link to="/login" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${userAuth ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
+                        <Link to="/login" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${(userAuth || adminAuth) ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
                             Login
                         </Link>
-                        <Link to="/signup" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${userAuth ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
+                        {/* <Link to="/signup" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${userAuth ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
                             Signup
-                        </Link>
-                        <div className={`px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-center ${userAuth ? "" : "hidden"}`} 
+                        </Link> */}
+                        <div className={`px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-center ${(userAuth || adminAuth) ? "" : "hidden"}`} 
                         onClick={async () => {
                             setIsOpen(false); 
-                            dispatch(logout());
+                            if(userAuth) dispatch(logout());
+                            if(adminAuth) dispatch(adminlogout());
                             navigate("/")
                         }}>
                             Signout

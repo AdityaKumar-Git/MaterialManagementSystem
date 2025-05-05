@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 import { User } from "../models/user.model.js";
+import { Cart } from "../models/cart.model.js";
 
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -65,11 +66,31 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!createdUser){
         throw new ApiError(404, "Something went wrong while registering the user.");
     }
+    
+    const cart = await Cart.create({
+        userId: createdUser._id,
+        products: []
+    })
+    
+    const createdCart = await User.findById(cart._id);
+    
+    if (!createdCart){
+        throw new ApiError(400, "Something went wrong while registering the user.");
+    }
 
-    return res.status(201).json(
-        new ApiResponse(200, createdUser, "User Registered Successfully")
+    const updatedUser = await User.findByIdAndUpdate(
+        createdUser._id,
+        { 
+            $set:{
+                cart: createdCart._id,
+            } 
+        },
+        { new: true }
     )
 
+    return res.status(201).json(
+        new ApiResponse(200, updatedUser, "User Registered Successfully")
+    )
 }) 
 
 const loginUser = asyncHandler(async (req, res) => {

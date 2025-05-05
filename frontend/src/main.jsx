@@ -15,6 +15,7 @@ import AddProduct from './pages/AddProduct.jsx'
 import AllProducts from './pages/AllProducts.jsx'
 import AllOrders from './pages/AllOrders.jsx'
 import ContactUs from './pages/Contact.jsx'
+import Product from './pages/Product.jsx'
 
 let router = createBrowserRouter(
   createRoutesFromElements(
@@ -44,6 +45,7 @@ let router = createBrowserRouter(
       }/>
 
       <Route path='products' element={<AllProducts />}/>
+      <Route path="products/:productId" element={<Product />}/>
       <Route path='contact' element={<ContactUs />}/>
 
     </Route>

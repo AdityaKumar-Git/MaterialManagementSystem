@@ -35,7 +35,7 @@ const addProduct = asyncHandler (async(req, res) => {
 })
 
 const removeProduct = asyncHandler(async(req, res) => {
-    const {productId, quantity} = req.body
+    const {productId} = req.params
     const user = req.user
 
     const cart = await Cart.findById(user.cart);
@@ -64,7 +64,7 @@ const removeProduct = asyncHandler(async(req, res) => {
 const changeQuantity = asyncHandler(async(req, res) => {
     const {productId, quantity} = req.body
     const user = req.user
-
+    console.log(productId);
     const cart = await Cart.findById(user.cart);
 
     
@@ -99,10 +99,24 @@ const changeQuantity = asyncHandler(async(req, res) => {
     )
 })
 
+const getCart = asyncHandler(async(req, res) => {
+    const { cartId } = req.params
+    console.log(cartId)
+    const cart = await Cart.findById(cartId).populate('products.product');
+
+    if(!cart) {
+        throw new ApiError('Cart not found', 404);
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, cart, "Product quantity successfully updated in the cart")
+    )
+})
 
 
 export{
     addProduct,
     removeProduct,
-    changeQuantity
+    changeQuantity,
+    getCart
 }

@@ -11,11 +11,14 @@ import Login from './pages/Login.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import AdminHome from './pages/AdminHome.jsx'
 import AdminProtected from './components/AdminProtected.jsx'
+import UserProtected from './components/UserProtected.jsx'
 import AddProduct from './pages/AddProduct.jsx'
 import AllProducts from './pages/AllProducts.jsx'
 import AllOrders from './pages/AllOrders.jsx'
 import ContactUs from './pages/Contact.jsx'
 import Product from './pages/Product.jsx'
+import Cart from './pages/Cart.jsx'
+import Checkout from './pages/CheckOut.jsx'
 
 let router = createBrowserRouter(
   createRoutesFromElements(
@@ -43,10 +46,23 @@ let router = createBrowserRouter(
             <AllOrders />
         </AdminProtected>
       }/>
+      
 
       <Route path='products' element={<AllProducts />}/>
       <Route path="products/:productId" element={<Product />}/>
       <Route path='contact' element={<ContactUs />}/>
+      
+      <Route path='cart' element={
+        <UserProtected authentication>
+            <Cart />
+        </UserProtected>
+      }/>
+
+      <Route path='checkout' element={
+        <UserProtected authentication>
+            <Checkout />
+        </UserProtected>
+      }/>
 
     </Route>
     </>

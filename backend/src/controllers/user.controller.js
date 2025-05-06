@@ -58,21 +58,21 @@ const registerUser = asyncHandler(async (req, res) => {
         password,
         phoneNumber
     })
-
+    
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
-
+    
     if (!createdUser){
         throw new ApiError(404, "Something went wrong while registering the user.");
     }
     
     const cart = await Cart.create({
-        userId: createdUser._id,
+        user: createdUser._id,
         products: []
     })
     
-    const createdCart = await User.findById(cart._id);
+    const createdCart = await Cart.findById(cart._id);
     
     if (!createdCart){
         throw new ApiError(400, "Something went wrong while registering the user.");
@@ -86,6 +86,8 @@ const registerUser = asyncHandler(async (req, res) => {
             } 
         },
         { new: true }
+    ).select(
+        "-password -refreshToken"
     )
 
     return res.status(201).json(

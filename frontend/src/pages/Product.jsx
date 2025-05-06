@@ -34,7 +34,10 @@ const Product = () => {
 
   const handleAddToCart = async () => {
     try {
-      const response = await axios(`/cart/addProduct/${productId}`);
+      const response = await axios.post(`cart/addProduct/${productId}`, {
+        quantity: quantity,
+        productId: productId
+      });
       
       toast.success("Added to cart successfully");
     } catch (err) {

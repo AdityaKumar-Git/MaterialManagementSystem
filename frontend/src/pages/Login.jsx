@@ -67,8 +67,8 @@ const Login = () => {
                 if (response?.data?.success) {
                     dispatch(
                       login({
-                        user: response.data.user,
-                        accessToken: response.data.token,
+                        user: response.data.data.user,
+                        accessToken: response.data.data.token,
                       })
                     );
                     console.log(response?.data?.message);

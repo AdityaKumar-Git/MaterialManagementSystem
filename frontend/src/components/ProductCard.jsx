@@ -1,6 +1,17 @@
-const ProductCard = ({ name, price, stock, description, image }) => {
+import { useNavigate } from "react-router-dom";
+
+const ProductCard = ({ name, price, stock, description, image, _id }) => {
+    const navigate = useNavigate();
+    
+    const handleClick = () => {
+        navigate(`/products/${_id}`);
+    };
+    
     return (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden p-4 flex flex-col transition hover:shadow-xl cursor-pointer">
+        <div 
+            className="bg-white shadow-md rounded-lg overflow-hidden p-4 flex flex-col transition hover:shadow-xl cursor-pointer"
+            onClick={handleClick}
+        >
             <img
                 src={image || "https://via.placeholder.com/300x200?text=No+Image"}
                 alt={name}

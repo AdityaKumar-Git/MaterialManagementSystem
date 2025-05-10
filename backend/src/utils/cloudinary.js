@@ -23,7 +23,7 @@ const checkup = () => {
 //     api_secret: process.env.CLOUDINARY_API_SECRET ? "✓ present" : "✗ missing"
 //   });
 
-console.log("OUTSIDE", process.env.CLOUDINARY_API_KEY);
+// console.log("OUTSIDE", process.env.CLOUDINARY_API_KEY);
 
 const uploadProductImageOnCloudinary = async (localFilePath) => {
     try {

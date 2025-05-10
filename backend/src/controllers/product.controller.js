@@ -79,6 +79,34 @@ const updateProduct = asyncHandler(async(req, res) => {
     // continued....
 })
 
+const allProducts = asyncHandler(async(req, res) => {
+    
+    const products = await Product.find()
+
+    return res.status(200).json(
+        new ApiResponse(200, products, "Products Retrieved Successfully")
+    )
+})
+
+const productDetail = asyncHandler(async(req, res) => {
+    
+    const {productId} = req.params;
+    console.log(productId)
+
+    // const product = await Product.findById(new mongoose.Types.ObjectId(productId)).populate('reviews')
+    const product = await Product.findById(productId).populate('reviews')
+    // console.log(product);
+    if (!product) {
+        throw new ApiError(404, "Product not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, product, "Product Details Retrieved Successfully")
+    )
+})
+
 export {
-    addProduct
+    addProduct,
+    allProducts,
+    productDetail
 }

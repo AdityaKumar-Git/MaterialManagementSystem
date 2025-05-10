@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import axios from "../axios.js";
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -42,6 +42,13 @@ const Header = () => {
 
                 {/* Profile / Auth Buttons */}
                 <div className="hidden md:flex items-center gap-2">
+                    {/* Cart Button - Only visible when logged in as user */}
+                    {userAuth && (
+                        <Link to="/cart" className="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors duration-200">
+                            <ShoppingCart size={20} className="mr-2" />
+                            <span className="font-medium">Cart</span>
+                        </Link>
+                    )}
                     {/* <Link to="/profile" className="text-gray-700 hover:text-blue-600">
                         Profile
                     </Link> */}
@@ -84,6 +91,13 @@ const Header = () => {
                         <Link to="/contact" className={`text-gray-700 hover:text-blue-600 ${adminAuth ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
                             Contact
                         </Link>
+                        {/* Cart Link - Only visible when logged in as user */}
+                        {userAuth && (
+                            <Link to="/cart" className="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors duration-200" onClick={() => setIsOpen(false)}>
+                                <ShoppingCart size={20} className="mr-2" />
+                                <span className="font-medium">Cart</span>
+                            </Link>
+                        )}
                         <Link to="/login" className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center ${(userAuth || adminAuth) ? "hidden" : ""}`} onClick={() => setIsOpen(false)}>
                             Login
                         </Link>

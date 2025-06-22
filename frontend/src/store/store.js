@@ -12,6 +12,8 @@ import {
 import storage from 'redux-persist/lib/storage';
 import authReducer from './authSlice'; 
 import adminReducer from './adminSlice'
+import tenderReducer from './tenderSlice';
+import bidReducer from './bidSlice';
 
 const persistConfig = {
   key: 'root',
@@ -23,6 +25,8 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authReducer,
   admin: adminReducer,
+  tender: tenderReducer,
+  bid: bidReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

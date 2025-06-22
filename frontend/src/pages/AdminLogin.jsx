@@ -25,6 +25,7 @@ const AdminLogin = () => {
     });
 
     const [passError, setPassError] = useState("");
+    const [loginError, setLoginError] = useState("");
 
     const handleUsername = (e) => {
         const username = e.target.value;
@@ -49,37 +50,38 @@ const AdminLogin = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoginError("");
+        
         try {
             if(passError !== ""){
                 console.log("Wrong Pass:", formData);
+                return;
             }
-            else{
-                // console.log("Correct Pass:", formData);
-                
-                const response = await axios.post("admins/login", formData)
-                .catch(error => {
-                    console.log("Axios caught error:", error);
-                    // throw error; // Re-throw the error so it reaches catch block
-                });
-                
 
-                console.log(response);
-                if (response?.data?.success) {
-                    dispatch(
-                      login({
-                        admin: response.data.admin,
-                        accessToken: response.data.token,
-                      })
-                    );
-                    console.log(response?.data?.message);
-                    navigate('/adminHome');
+            const response = await axios.post("admins/login", formData);
+            console.log("Login response:", response);
+
+            if (response?.data?.data) {
+                const { admin, accessToken } = response.data.data;
+                
+                if (!admin || !accessToken) {
+                    setLoginError("Invalid response from server");
+                    return;
                 }
-                else{
-                    console.log("Failed to Login:", response.data);
-                }
+
+                dispatch(login({
+                    admin,
+                    accessToken
+                }));
+
+                console.log("Login successful");
+                navigate('/adminHome');
+            } else {
+                setLoginError("Invalid response from server");
             }
-        } catch (error){
-            console.log("Login Error in Login.jsx:", error);
+        } catch (error) {
+            console.error("Login Error:", error);
+            setLoginError(error.response?.data?.message || "Login failed. Please try again.");
         }
     };
 
@@ -92,7 +94,6 @@ const AdminLogin = () => {
                         type="text" 
                         name="username" 
                         placeholder="Email Address or Phone Number" 
-                        // value={formData.email} 
                         onChange={handleUsername} 
                         className="px-4 py-2 border rounded-md"
                         required
@@ -101,16 +102,16 @@ const AdminLogin = () => {
                         type="password" 
                         name="password" 
                         placeholder="Password" 
-                        // value={formData.password} 
                         onChange={handlePassword} 
                         className="px-4 py-2 border rounded-md"
                         required
                     />
-                    {
-                        passError && <div>
-                            <p className="text-red-500 text-sm">{passError}</p>
-                        </div>
-                    }
+                    {passError && (
+                        <p className="text-red-500 text-sm">{passError}</p>
+                    )}
+                    {loginError && (
+                        <p className="text-red-500 text-sm">{loginError}</p>
+                    )}
                     <button type="submit" className="px-6 py-3 bg-blue-600 text-white rounded-md text-lg font-semibold hover:bg-blue-700">
                         Login
                     </button>

@@ -20,7 +20,7 @@ const Header = () => {
     return (
         <header className="bg-white shadow-md px-6 py-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link to="/" className="text-2xl font-bold text-blue-600">
+                <Link to={`${adminAuth? "adminHome" : "/"}`} className="text-2xl font-bold text-blue-600">
                     <img src="../../logo.svg" alt="logo" className=" h-8 mr-2 inline" />
                     HiBuy
                 </Link>

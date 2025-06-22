@@ -75,6 +75,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const createdCart = await Cart.findById(cart._id);
     
     if (!createdCart){
+        await User.findByIdAndDelete(createdUser._id)
         throw new ApiError(400, "Something went wrong while registering the user.");
     }
 
@@ -89,6 +90,12 @@ const registerUser = asyncHandler(async (req, res) => {
     ).select(
         "-password -refreshToken"
     )
+
+    if (!updatedUser){
+        await User.findByIdAndDelete(createdUser._id)
+        await Cart.findByIdAndDelete(createdCart._id)
+        throw new ApiError(400, "Something went wrong while registering the user.");
+    }
 
     return res.status(201).json(
         new ApiResponse(200, updatedUser, "User Registered Successfully")

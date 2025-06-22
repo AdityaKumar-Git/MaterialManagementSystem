@@ -19,6 +19,10 @@ import ContactUs from './pages/Contact.jsx'
 import Product from './pages/Product.jsx'
 import Cart from './pages/Cart.jsx'
 import Checkout from './pages/CheckOut.jsx'
+import CreateTender from './pages/CreateTender.jsx'
+import TenderList from './pages/TenderList.jsx'
+import UserTenders from "./pages/UserTenders";
+import StoreItems from './pages/StoreItems.jsx';
 
 let router = createBrowserRouter(
   createRoutesFromElements(
@@ -46,8 +50,26 @@ let router = createBrowserRouter(
             <AllOrders />
         </AdminProtected>
       }/>
-      
 
+
+      <Route path='viewStore' element={
+        <AdminProtected authentication>
+            <StoreItems />
+        </AdminProtected>
+      }/>
+
+      <Route path='tenders' element={
+        <AdminProtected authentication>
+            <TenderList />
+        </AdminProtected>
+      }/>
+
+      <Route path='tenders/create' element={
+        <AdminProtected authentication>
+            <CreateTender />
+        </AdminProtected>
+      }/>
+      
       <Route path='products' element={<AllProducts />}/>
       <Route path="products/:productId" element={<Product />}/>
       <Route path='contact' element={<ContactUs />}/>
@@ -63,6 +85,8 @@ let router = createBrowserRouter(
             <Checkout />
         </UserProtected>
       }/>
+
+      <Route path="tenders/user" element={<UserTenders />} />
 
     </Route>
     </>

@@ -1,12 +1,24 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const getStoredAdmin = () => {
+  try {
+    const admin = localStorage.getItem('admin');
+    return admin ? JSON.parse(admin) : null;
+  } catch (error) {
+    console.error('Error parsing admin data:', error);
+    return null;
+  }
+};
+
+const initialState = {
+  admin: getStoredAdmin(),
+  adminAuth: !!localStorage.getItem('token'),
+  token: localStorage.getItem('token') || null
+};
+
 const adminSlice = createSlice({
   name: 'admin',
-  initialState: {
-    admin: null, 
-    adminAuth: false,
-    token: null
-  },
+  initialState,
 
   reducers: {
     login(state, action) {

@@ -60,7 +60,8 @@ const addProduct = asyncHandler(async(req, res) => {
 })
 
 const updateProduct = asyncHandler(async(req, res) => {
-    const {name, price, description, category, stock, image} = req.body
+    const {name, price, description, category, stock} = req.body
+    const {productId} = req.params
     console.log("Name: ",name)
 
     if([name,description,category].some(
@@ -70,13 +71,66 @@ const updateProduct = asyncHandler(async(req, res) => {
     if(price <= 0){ throw new ApiError(400, "Price must be greater than 0")}
     if(stock <= 0){ throw new ApiError(400, "Stock must be greater than 0")}
     
-    let existedProduct = await Product.findOne({name});
+    const existedProduct = await Product.findById(productId);
     if(!existedProduct) throw new ApiError(404, "Product not found");
 
-    if(image.trim() === "") image = "https://placehold.co/300x200";
+    const productImagePaths = req.files?.images;
+    
+    if (!productImagePaths || productImagePaths.length === 0) {
+        throw new ApiError(400, "At least one product image is required");
+    }
+    
+    const uploadedImages = [];
+    for (const file of productImagePaths) {
+        const localFilePath = file.path;
+    
+        const uploadedImage = await uploadProductImageOnCloudinary(localFilePath);
+        if (!uploadedImage) {
+            throw new ApiError(400, "Failed to upload one or more product images");
+        }
+    
+        uploadedImages.push(uploadedImage.url); 
+    }
 
-    existedProduct.description = description;
-    // continued....
+    const updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        {
+            $set: {
+                name,
+                price,
+                description,
+                category,
+                stock,
+                image: uploadedImages,
+            },
+        },
+        { new: true }
+    )
+
+    if(!updatedProduct) throw new ApiError(404, "Something went wrong.");
+
+    console.log("Successfully updated product")
+
+    return res.status(201).json(
+        new ApiResponse(200, updatedProduct, "Product updated Successfully")
+    )
+})
+
+const updateProductQuantity = asyncHandler(async(items) => {
+
+    const products = await Product.find();
+
+    const updatePromises = items.map(async (item) => {
+        const product = products.find((p) => p.name === item.name);
+        if (product) {
+        product.stock = (Number(product.stock) + item.quantity).toString();
+        return product.save();
+        }
+    });
+
+    await Promise.all(updatePromises);
+
+    // res.status(200).json({ message: "Product quantities updated successfully." });
 })
 
 const allProducts = asyncHandler(async(req, res) => {
@@ -107,6 +161,8 @@ const productDetail = asyncHandler(async(req, res) => {
 
 export {
     addProduct,
+    updateProduct,
+    updateProductQuantity,
     allProducts,
     productDetail
 }

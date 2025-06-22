@@ -1,9 +1,10 @@
-import { FaBoxOpen, FaClipboardList, FaPlus } from "react-icons/fa";
+import { FaBoxOpen, FaClipboardList, FaPlus, FaStore } from "react-icons/fa";
 
 const icons = {
     add: <FaPlus className="text-4xl text-blue-600" />,
     stock: <FaBoxOpen className="text-4xl text-green-600" />,
     orders: <FaClipboardList className="text-4xl text-purple-600" />,
+    store: <FaStore className="text-4xl text-orange-600" />,
 };
 
 const AdminCard = ({ title, description, type, onClick }) => {

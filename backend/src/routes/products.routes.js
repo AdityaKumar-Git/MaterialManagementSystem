@@ -1,6 +1,6 @@
 import {Router} from "express"
 import { upload } from '../middlewares/multer.middleware.js'
-import { addProduct, allProducts, productDetail } from "../controllers/product.controller.js"
+import { addProduct, allProducts, productDetail, updateProduct } from "../controllers/product.controller.js"
 import {verifyJWT} from "../middlewares/adminAuth.middleware.js"
 
 const router = Router()
@@ -17,5 +17,6 @@ router.route("/addProduct").post(verifyJWT,
 
 router.route("/getAllProducts").get(allProducts);
 router.route("/:productId").get(productDetail);
+router.route("/update/:productId").post(updateProduct);
 
 export default router

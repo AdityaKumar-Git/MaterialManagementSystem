@@ -22,6 +22,18 @@ const AdminDashboard = () => {
             type: "orders",
             onClick: () => navigate("/viewOrders"),
         },
+        {
+            title: "Manage Tenders",
+            description: "Create and manage procurement tenders.",
+            type: "tender",
+            onClick: () => navigate("/tenders"),
+        },
+        {
+            title: "Store Items",
+            description: "View store inventories.",
+            type: "store",
+            onClick: () => navigate("/viewStore"),
+        },
     ];
 
     return (

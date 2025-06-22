@@ -15,7 +15,7 @@ const ProductCard = ({ name, price, stock, description, image, _id }) => {
             <img
                 src={image || "https://via.placeholder.com/300x200?text=No+Image"}
                 alt={name}
-                className="w-full h-48 object-cover rounded-md"
+                className={`w-full h-48 object-cover rounded-md ${(image === "") ? "hidden" : ""}`}
             />
             <div className="mt-4 flex flex-col gap-1">
                 <h3 className="text-lg font-bold text-gray-800 truncate">{name}</h3>

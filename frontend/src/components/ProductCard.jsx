@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { selectAdminAuth } from "../store/adminSlice";
+import { useSelector } from "react-redux";
 
 const ProductCard = ({ name, price, stock, description, image, _id }) => {
     const navigate = useNavigate();
+    const adminAuth = useSelector(selectAdminAuth);
     
     const handleClick = () => {
-        navigate(`/products/${_id}`);
+        if(adminAuth) {
+            navigate(`/updateProduct/${_id}`);
+        } else {
+            navigate(`/products/${_id}`);
+        }
     };
     
     return (
@@ -13,7 +20,7 @@ const ProductCard = ({ name, price, stock, description, image, _id }) => {
             onClick={handleClick}
         >
             <img
-                src={image || "https://via.placeholder.com/300x200?text=No+Image"}
+                src={image[0] || image || "https://via.placeholder.com/300x200?text=No+Image"}
                 alt={name}
                 className={`w-full h-48 object-cover rounded-md ${(image === "") ? "hidden" : ""}`}
             />

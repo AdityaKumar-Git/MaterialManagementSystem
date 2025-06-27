@@ -55,5 +55,16 @@ app.use("/api/v1/tenders", tenderRouter)
 app.use("/api/v1/tenders", bidRouter)
 app.use("/api/v1/store", storeRouter)
 
+// Global error handler middleware
+app.use((err, req, res, next) => {
+    console.error("GLOBAL ERROR HANDLER:", err);
+    res.status(err.statusCode || 500).json({
+      success: false,
+      message: err.message || "Internal Server Error",
+      errors: err.errors || [],
+      data: err.data || null,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined
+    });
+  });
 
 export {app};

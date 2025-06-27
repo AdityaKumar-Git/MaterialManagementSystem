@@ -36,7 +36,7 @@ const uploadProductImageOnCloudinary = async (localFilePath) => {
             resource_type: "auto",
             folder: "materialmanagement/productimage",
         })
-        console.log("File is uploaded on Cloudinary ", response.url);
+        // console.log("File is uploaded on Cloudinary ", response.url);
         fs.unlinkSync(localFilePath)
         return response;
     }
@@ -57,7 +57,7 @@ const uploadProfileImageOnCloudinary = async (localFilePath) => {
             resource_type: "auto",
             folder: "materialmanagement/profileImage",
         })
-        console.log("File is uploaded on Cloudinary ", response.url);
+        // console.log("File is uploaded on Cloudinary ", response.url);
         fs.unlinkSync(localFilePath)
         return response;
     }
@@ -67,8 +67,26 @@ const uploadProfileImageOnCloudinary = async (localFilePath) => {
     }
 }
 
+const deleteImageFromCloudinary = async (imageUrl) => {
+    try {
+        if (!imageUrl) return null;
+        
+        // Extract public_id from URL
+        const urlParts = imageUrl.split('/');
+        const filenameWithExtension = urlParts[urlParts.length - 1];
+        const publicId = `materialmanagement/productimage/${filenameWithExtension.split('.')[0]}`;
+        
+        const response = await cloudinary.uploader.destroy(publicId);
+        // console.log("Image deleted from Cloudinary:", publicId);
+        return response;
+    } catch (error) {
+        console.log("Error deleting image from Cloudinary:", error);
+        return null;
+    }
+}
 
 export {
     uploadProductImageOnCloudinary,
-    uploadProfileImageOnCloudinary
+    uploadProfileImageOnCloudinary,
+    deleteImageFromCloudinary
 }

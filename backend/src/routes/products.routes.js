@@ -17,6 +17,14 @@ router.route("/addProduct").post(verifyJWT,
 
 router.route("/getAllProducts").get(allProducts);
 router.route("/:productId").get(productDetail);
-router.route("/update/:productId").post(updateProduct);
+router.route("/update/:productId").post(verifyJWT,
+    upload.fields([
+        {
+            name: "images",
+            maxCount: 4
+        }
+    ]),
+    updateProduct
+);
 
 export default router

@@ -17,7 +17,7 @@ const Cart = () => {
 
   useEffect(() => {
     fetchCart();
-  }, [user?.cart]); // Re-fetch when user cart ID changes
+  }, [user?.cart]);
 
   const fetchCart = async () => {
     try {
@@ -32,7 +32,6 @@ const Cart = () => {
       const response = await axios.get(`/cart/getCart/${user?.cart}`);
       // console.log("Cart data received:", response.data.data);
       
-      // Validate the data structure before updating state
       const cartData = response.data.data;
       if (cartData && Array.isArray(cartData.products)) {
         setCart(cartData);
@@ -52,8 +51,6 @@ const Cart = () => {
   useEffect(() => {
     if (cart && cart.products && Array.isArray(cart.products)) {
       calculateTotals();
-      // Debug log to help troubleshoot data issues
-      // console.log("Cart Products:", cart.products);
     }
   }, [cart]);
 
@@ -62,7 +59,6 @@ const Cart = () => {
     let amount = 0;
     
     cart.products.forEach((item) => {
-      // Handle NaN and undefined values
       const quantity = Number(item.quantity) || 0;
       const price = Number(item.product?.price) || 0;
       
@@ -79,8 +75,7 @@ const Cart = () => {
       if (newQuantity < 1) {
         return handleRemoveProduct(productId);
       }
-
-      // Store the current cart state before making the API call
+      
       const previousCart = {...cart};
 
       const response = await axios.put(`/cart/changeQuantity/${user?.cart}`, {
@@ -88,19 +83,15 @@ const Cart = () => {
         quantity: newQuantity
       });
       
-      // Check if the response data has complete product information
-      const updatedCart = response.data.data;
-      
-      // If the response doesn't contain full product details, manually update quantity
+      const updatedCart = response.data;
       if (updatedCart && updatedCart.products) {
-        // Check if products still have complete data
+        
         const hasCompleteData = updatedCart.products.every(item => 
           item.product && item.product.name && item.product.price !== undefined
         );
         
         if (!hasCompleteData) {
           console.log("Incomplete data in API response, updating locally");
-          // Use previous cart data but update the quantity
           const updatedProducts = previousCart.products.map(item => {
             if (item.product._id === productId) {
               return { ...item, quantity: newQuantity };
@@ -113,11 +104,9 @@ const Cart = () => {
             products: updatedProducts
           });
         } else {
-          // Response has complete data, use it directly
           setCart(updatedCart);
         }
       } else {
-        // Fallback: manually update the quantity in the current state
         const updatedProducts = cart.products.map(item => {
           if (item.product._id === productId) {
             return { ...item, quantity: newQuantity };
@@ -141,16 +130,11 @@ const Cart = () => {
   const handleRemoveProduct = async (productId) => {
     const previousCart = {...cart};
     try {
-      // Store the current cart state before making the API call
-      
-      // Remove the product locally first for immediate UI update
       const updatedProducts = cart.products.filter(item => item.product._id !== productId);
       setCart({...cart, products: updatedProducts});
       
-      // Then make the API call
       const response = await axios.delete(`/cart/removeProduct/${productId}`);
       
-      // If the API returns complete data, use it, otherwise keep our local update
       if (response.data.data && response.data.data.products && 
           response.data.data.products.every(item => item.product && item.product.name)) {
         setCart(response.data.data);
@@ -158,7 +142,6 @@ const Cart = () => {
       
       toast.success("Product removed from cart");
     } catch (err) {
-      // If there's an error, revert to the previous state
       setCart(previousCart);
       toast.error(err.message || "Failed to remove product");
       console.error("Error removing product:", err);
@@ -287,12 +270,12 @@ const Cart = () => {
                           
                           <div className="text-right">
                             <p className="text-gray-600 text-sm">Price per unit</p>
-                            <p className="text-lg font-medium text-gray-800">${(Number(item.product?.price) || 0).toFixed(2)}</p>
+                            <p className="text-lg font-medium text-gray-800">₹{(Number(item.product?.price) || 0).toFixed(2)}</p>
                           </div>
                           
                           <div className="text-right">
                             <p className="text-gray-600 text-sm">Subtotal</p>
-                            <p className="text-lg font-medium text-gray-800">${((Number(item.product?.price) || 0) * (Number(item.quantity) || 0)).toFixed(2)}</p>
+                            <p className="text-lg font-medium text-gray-800">₹{((Number(item.product?.price) || 0) * (Number(item.quantity) || 0)).toFixed(2)}</p>
                           </div>
                         </div>
                       </div>
@@ -312,7 +295,7 @@ const Cart = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2)}</span>
+                    <span className="font-medium">₹{isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2)}</span>
                   </div>
                   
                   <div className="flex justify-between">
@@ -327,7 +310,7 @@ const Cart = () => {
                   
                   <div className="border-t border-gray-200 pt-4 flex justify-between">
                     <span className="text-lg font-semibold">Total</span>
-                    <span className="text-lg font-bold text-blue-600">${isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2)}</span>
+                    <span className="text-lg font-bold text-blue-600">₹{isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
                 

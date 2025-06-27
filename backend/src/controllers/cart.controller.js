@@ -12,17 +12,22 @@ const addProduct = asyncHandler (async(req, res) => {
     const cart = await Cart.findById(user.cart);
     
     if(!cart) {
-        throw new ApiError('Cart not found', 404);
+        throw new ApiError(404, 'Cart not found');
     }
     
     const product = await Product.findById(productId);
     
     if(!product) {
-        throw new ApiError('Product not found', 404);
+        throw new ApiError(404, 'Product not found');
     }
 
     if(parseInt(product.stock) < quantity) {
-        throw new ApiError('Not enough stock available', 400);
+        throw new ApiError(400, 'Not enough stock available');
+    }
+
+    if(cart.products.find(p => p.product.toString() === productId.toString())) {
+        // console.log("Product already in the cart");
+        throw new ApiError(400, 'Product already in the cart');
     }
 
     cart.products.push({product: productId, quantity: quantity});

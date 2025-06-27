@@ -23,6 +23,8 @@ import CreateTender from './pages/CreateTender.jsx'
 import TenderList from './pages/TenderList.jsx'
 import UserTenders from "./pages/UserTenders";
 import StoreItems from './pages/StoreItems.jsx';
+import UpdateProduct from './pages/UpdateProduct.jsx';
+
 
 let router = createBrowserRouter(
   createRoutesFromElements(
@@ -42,6 +44,12 @@ let router = createBrowserRouter(
       <Route path='addProduct' element={
         <AdminProtected authentication>
             <AddProduct />
+        </AdminProtected>
+      }/>
+
+      <Route path='updateProduct/:productId' element={
+        <AdminProtected authentication>
+            <UpdateProduct />
         </AdminProtected>
       }/>
 

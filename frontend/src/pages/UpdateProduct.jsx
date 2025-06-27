@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { selectAdminAuth } from "../store/adminSlice";
+import { useSelector } from "react-redux";
 import axios from "../axios";
 
 const UpdateProduct = () => {
@@ -16,18 +18,21 @@ const UpdateProduct = () => {
     stock: 0,
     image: []
   });
-  const [newImage, setNewImage] = useState("");
+  const [newImages, setNewImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const adminAuth = useSelector(selectAdminAuth);
   
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await axios(`/products/${productId}`);
+        const response = await axios.get(`/products/${productId}`);
         
         if (!response.data.data) {
           throw new Error("Product not found");
         }
         setProduct(response.data.data);
+        setExistingImages(response.data.data.image || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -46,46 +51,79 @@ const UpdateProduct = () => {
     });
   };
 
-  const handleAddImage = () => {
-    if (newImage.trim()) {
-      setProduct({
-        ...product,
-        image: [...product.image, newImage.trim()]
-      });
-      setNewImage("");
-    }
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setNewImages(prev => [...prev, ...files]);
   };
 
-  const handleRemoveImage = (index) => {
-    // Prevent removing if it's the last image
-    if (product.image.length <= 1) {
+  const handleRemoveNewImage = (index) => {
+    if (existingImages.length <= 1 && newImages.length === 0) {
+      toast.error("At least one product image is required");
+      return;
+    }
+
+    setNewImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveExistingImage = (index) => {
+    // Prevent removing if it's the last image and no new images
+    if (existingImages.length <= 1 && newImages.length === 0) {
       toast.error("At least one product image is required");
       return;
     }
     
-    const updatedImages = [...product.image];
-    updatedImages.splice(index, 1);
-    setProduct({
-      ...product,
-      image: updatedImages
-    });
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate at least one image is present
-    if (product.image.length === 0) {
+    if (existingImages.length === 0 && newImages.length === 0) {
       toast.error("At least one product image is mandatory");
       return;
     }
     
     try {
       setSubmitting(true);
-      await axios.put(`/products/${productId}`, product);
+      
+      const productForm = new FormData();
+      productForm.append("name", product.name);
+      productForm.append("description", product.description);
+      productForm.append("price", product.price);
+      productForm.append("stock", product.stock);
+      
+      // Append existing images as URLs
+      existingImages.forEach((imgUrl, index) => {
+        productForm.append("existingImages", imgUrl);
+      });
+      
+      // Append new image files
+      newImages.forEach((file) => {
+        productForm.append("images", file);
+      });
+
+      // console.log("Existing Images:", existingImages);
+      // console.log("New Images:", newImages);
+      // console.log("Product Form entries:");
+
+      for (let [key, value] of productForm.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await axios.post(`/products/update/${productId}`, productForm, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      
       toast.success("Product updated successfully");
-      navigate(`/products/${productId}`);
+      if (!adminAuth) {
+        navigate(`/products/${productId}`);
+      } else {
+        navigate(`/products`);
+      }
     } catch (err) {
+      console.log("Update product error:", err);
       toast.error(err.response?.data?.message || "Failed to update product");
     } finally {
       setSubmitting(false);
@@ -181,7 +219,7 @@ const UpdateProduct = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                        Price ($) *
+                        Price (₹) *
                       </label>
                       <input
                         type="number"
@@ -219,53 +257,82 @@ const UpdateProduct = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Product Images *
                     </label>
-                    <div className={`border ${product.image.length === 0 ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md p-4`}>
-                      {product.image.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-                          {product.image.map((img, index) => (
-                            <div key={index} className="relative group">
-                              <img
-                                src={img}
-                                alt={`Product image ${index + 1}`}
-                                className="w-full h-24 object-cover rounded-md border border-gray-200"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveImage(index)}
-                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                disabled={product.image.length === 1}
-                                title={product.image.length === 1 ? "At least one image is required" : "Remove image"}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
-                            </div>
-                          ))}
+                    <div className={`border ${existingImages.length === 0 && newImages.length === 0 ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md p-4`}>
+                      
+                      {/* Existing Images */}
+                      {existingImages.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Existing Images</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {existingImages.map((img, index) => (
+                              <div key={`existing-${index}`} className="relative group">
+                                <img
+                                  src={img}
+                                  alt={`Existing product image ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded-md border border-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveExistingImage(index)}
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                  disabled={existingImages.length === 1 && newImages.length === 0}
+                                  title={existingImages.length === 1 && newImages.length === 0 ? "At least one image is required" : "Remove image"}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      ) : (
+                      )}
+
+                      {/* New Images */}
+                      {newImages.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">New Images</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {newImages.map((file, index) => (
+                              <div key={`new-${index}`} className="relative group">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`New product image ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded-md border border-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveNewImage(index)}
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Remove image"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* No images warning */}
+                      {existingImages.length === 0 && newImages.length === 0 && (
                         <p className="text-red-500 text-center py-4">No images added yet. At least one image is required.</p>
                       )}
                       
-                      {/* Add new image */}
-                      <div className="mt-3 flex">
+                      {/* Add new images */}
+                      <div className="mt-3">
                         <input
-                          type="url"
-                          value={newImage}
-                          onChange={(e) => setNewImage(e.target.value)}
-                          placeholder="Enter image URL"
-                          className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                          type="file"
+                          multiple
+                          onChange={handleImageUpload}
+                          accept="image/*"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         />
-                        <button
-                          type="button"
-                          onClick={handleAddImage}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700"
-                        >
-                          Add
-                        </button>
                       </div>
                       <p className="text-sm text-gray-500 mt-2">
-                        Add image URLs for your product. At least one image is mandatory. The first image will be used as the main image.
+                        Upload new images for your product. You can keep existing images and add new ones. At least one image is mandatory.
                       </p>
                     </div>
                   </div>

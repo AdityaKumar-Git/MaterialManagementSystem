@@ -38,10 +38,14 @@ const Product = () => {
         quantity: quantity,
         productId: productId
       });
+
+      console.log(response);
       
-      toast.success("Added to cart successfully");
+      toast.success(response.data.message || "Added to cart successfully");
+
     } catch (err) {
-      toast.error(err.message || "Failed to add to cart");
+      console.log("Hey in product.jsx 43",err);
+      toast.error(err.response?.data?.message || err.message || "Failed to add to cart");
     }
   };
 
@@ -162,7 +166,7 @@ const Product = () => {
               )}
               
               <div className="text-2xl font-bold text-blue-600 mb-4">
-                ${product.price.toLocaleString()}
+              ₹{product.price.toLocaleString()}
               </div>
               
               <div className="mb-6">
